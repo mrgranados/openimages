@@ -764,6 +764,9 @@ def _group_bounding_boxes(
     ]
     df_images.drop(unnecessary_columns, axis=1, inplace=True)
 
+    # filter images label codes so bboxes for other labels will not be included
+    df_images = df_images[df_images["LabelName"].isin(label_codes.values())]
+
     # create a dictionary and populate it with class labels mapped to
     # GroupByDataFrame objects with bounding boxes grouped by image ID
     labels_to_bounding_box_groups = {}
@@ -771,6 +774,9 @@ def _group_bounding_boxes(
 
         # filter the DataFrame down to just the images for the class label
         df_label_images = df_images[df_images["LabelName"] == class_code]
+
+        # filter the DataFrame by the class images to get all bounding boxes for each image
+        df_label_images = df_images[df_images["ImageID"].isin(df_label_images['ImageID'].tolist())]
 
         # drop the label name column since it's no longer needed
         df_label_images.drop(["LabelName"], axis=1, inplace=True)
